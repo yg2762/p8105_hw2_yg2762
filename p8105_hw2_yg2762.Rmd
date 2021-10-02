@@ -45,8 +45,8 @@ Combine precipitation datasets and convert month to a character variable
 ```{r}
 precip_df = 
   bind_rows (precip2018_df, precip2019_df) %>% 
-  relocate (year)
-  
+  relocate (year) %>% 
+  mutate(month = month.name[month])
 precip_df
 ``` 
 Mr. Trash Wheel data `trash_wheel_df` contains 344 observations and 14 variables; the precipitation dataset`precip_df` contains 18 observations and 3 variables. The total precipitation in 2018 is `sum (precip2018_df$total)`, the median number of sports balls in a dumpster in 2017 is `trash_wheel_filter=filter(trash_wheel_df, year == 2017)
@@ -64,6 +64,64 @@ median(trash_wheel_filter$sports_balls )
 ```
 
 # Problem 2
+
+```{r}
+pols_month_df = read_csv("./data/pols-month.csv") %>% 
+  janitor :: clean_names () %>% 
+  separate(mon, into = c ("year", "month", "day"), sep ="-", convert = TRUE )%>% 
+  mutate (month = month.name[month]) %>% 
+  select (-prez_dem, -prez_gop) %>% 
+  select (-day) %>% 
+  pivot_longer(
+    gov_gop:rep_dem,
+    names_to = "president",
+    values_to = "number"
+  )
+
+pols_month_df
+```
+
+```{r}
+snp_df = read_csv("./data/snp.csv") %>% 
+  janitor :: clean_names() %>% 
+  separate(date, into =c ("day", "month", "year"), sep = "/", convert =TRUE) %>% 
+  mutate (month = month.name[month]) %>% 
+  select (-day) %>% 
+  mutate (year = if_else(year>15, year + 1900, year + 2000)) %>% 
+  relocate (year, month)
+ 
+ 
+snp_df
+```
+
+```{r}
+unemployment_df = read_csv( "./data/unemployment.csv",col_types = "ddd" ) %>% 
+  janitor :: clean_names() %>% 
+  pivot_longer(
+    jan:dec,
+    names_to = "month",
+    values_to = "unemployment"
+  ) %>% 
+  mutate(month = factor(month)) %>% 
+  mutate (month = month.name[month])
+  
+
+unemployment_df
+```
+
+```{r}
+snp_pol_df = 
+  left_join (pols_month_df, snp_df, by =c("year", "month"))
+
+snp_pol_df
+
+
+final_df =
+  left_join (snp_pol_df, unemployment_df, by= c("year", "month"))
+
+final_df
+```
+
 
 
 
