@@ -11,8 +11,21 @@ library(readxl)
 ```
 
 # Problem 1
+Read and clean the Mr. Trash Wheel sheet
+
 ```{r}
-precip2019_df = read_excel("./trash-wheel.xlsx", sheet="2019 Precipitation", range = "A2:B14") %>% 
+trash_wheel_df= read_excel("./data/trash-wheel.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N406") %>% 
+  janitor :: clean_names() %>% 
+  drop_na(dumpster) %>% 
+  mutate (sports_balls = round(sports_balls, digits= 0))
+
+trash_wheel_df
+```
+
+
+Read and clean precipitation data for 2018 and 2019,omit rows without precipitation data and add a variable for year.
+```{r}
+precip2019_df = read_excel("./data/trash-wheel.xlsx", sheet="2019 Precipitation", range = "A2:B14") %>% 
   janitor :: clean_names() %>% 
   mutate (year = "2019") %>% 
   drop_na()
@@ -20,11 +33,42 @@ precip2019_df = read_excel("./trash-wheel.xlsx", sheet="2019 Precipitation", ran
 precip2019_df
 
 
-precip2018_df = read_excel ("./trash-wheel.xlsx", sheet="2018 Precipitation", range = "A2:B14") %>% 
+precip2018_df = read_excel ("./data/trash-wheel.xlsx", sheet="2018 Precipitation", range = "A2:B14") %>% 
   janitor :: clean_names() %>% 
   mutate (year = "2018") 
   
 precip2018_df
 ```
+
+Combine precipitation datasets and convert month to a character variable
+
+```{r}
+precip_df = 
+  bind_rows (precip2018_df, precip2019_df) %>% 
+  relocate (year)
+  
+precip_df
+``` 
+Mr. Trash Wheel data `trash_wheel_df` contains 344 observations and 14 variables; the precipitation dataset`precip_df` contains 18 observations and 3 variables. The total precipitation in 2018 is `sum (precip2018_df$total)`, the median number of sports balls in a dumpster in 2017 is `trash_wheel_filter=filter(trash_wheel_df, year == 2017)
+median(trash_wheel_filter$sports_balls )`
+
+```{r}
+trash_wheel_df
+precip_df
+
+sum (precip2018_df$total)
+
+trash_wheel_filter=filter(trash_wheel_df, year == 2017)
+median(trash_wheel_filter$sports_balls )
+
+```
+
+# Problem 2
+
+
+
+
+
+
 
 
