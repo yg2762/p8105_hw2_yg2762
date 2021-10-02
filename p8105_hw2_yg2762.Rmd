@@ -1,0 +1,30 @@
+---
+title: "p8105_hw2_yg2762"
+author: "Yang Gao"
+date: "10/1/2021"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+# Problem 1
+```{r}
+precip2019_df = read_excel("./trash-wheel.xlsx", sheet="2019 Precipitation", range = "A2:B14") %>% 
+  janitor :: clean_names() %>% 
+  mutate (year = "2019") %>% 
+  drop_na()
+  
+precip2019_df
+
+
+precip2018_df = read_excel ("./trash-wheel.xlsx", sheet="2018 Precipitation", range = "A2:B14") %>% 
+  janitor :: clean_names() %>% 
+  mutate (year = "2018") 
+  
+precip2018_df
+```
+
+
