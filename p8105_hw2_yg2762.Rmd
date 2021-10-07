@@ -14,7 +14,7 @@ library(readxl)
 Read and clean the Mr. Trash Wheel sheet
 
 ```{r}
-trash_wheel_df= read_excel("./data/trash-wheel.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N406") %>% 
+trash_wheel_df= read_excel("./data/trash-wheel.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N408") %>% 
   janitor :: clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate (sports_balls = round(sports_balls, digits= 0))
@@ -29,19 +29,16 @@ precip2019_df = read_excel("./data/trash-wheel.xlsx", sheet="2019 Precipitation"
   janitor :: clean_names() %>% 
   mutate (year = "2019") %>% 
   drop_na()
-  
 precip2019_df
 
 
 precip2018_df = read_excel ("./data/trash-wheel.xlsx", sheet="2018 Precipitation", range = "A2:B14") %>% 
   janitor :: clean_names() %>% 
   mutate (year = "2018") 
-  
 precip2018_df
 ```
 
 Combine precipitation datasets and convert month to a character variable
-
 ```{r}
 precip_df = 
   bind_rows (precip2018_df, precip2019_df) %>% 
@@ -49,22 +46,23 @@ precip_df =
   mutate(month = month.name[month])
 precip_df
 ``` 
-Mr. Trash Wheel data `trash_wheel_df` contains 344 observations and 14 variables; the precipitation dataset`precip_df` contains 18 observations and 3 variables. The total precipitation in 2018 is `sum (precip2018_df$total)`, the median number of sports balls in a dumpster in 2017 is `trash_wheel_filter=filter(trash_wheel_df, year == 2017)
-median(trash_wheel_filter$sports_balls )`
+Mr. Trash Wheel data `trash_wheel_df` contains 344 observations and 14 variables; the precipitation dataset`precip_df` contains 18 observations and 3 variables. The total precipitation in 2018 is `sum (pull(precip2018_df, total))`, the median number of sports balls in a dumpster in 2017 is `trash_wheel_2017=filter(trash_wheel_df, year == 2017)` `median (pull (trash_wheel_2017, sports_balls ))`
 
-```{r}
+
+```{r,eval=FALSE}
 trash_wheel_df
 precip_df
 
-sum (precip2018_df$total)
 
-trash_wheel_filter=filter(trash_wheel_df, year == 2017)
-median(trash_wheel_filter$sports_balls )
+sum (pull(precip2018_df, total))
+
+trash_wheel_2017=filter(trash_wheel_df, year == 2017)
+median (pull (trash_wheel_2017, sports_balls ))
 
 ```
 
 # Problem 2
-
+clean up pol-month.csv
 ```{r}
 pols_month_df = read_csv("./data/pols-month.csv") %>% 
   janitor :: clean_names () %>% 
@@ -81,6 +79,7 @@ pols_month_df = read_csv("./data/pols-month.csv") %>%
 pols_month_df
 ```
 
+clean up snp.csv
 ```{r}
 snp_df = read_csv("./data/snp.csv") %>% 
   janitor :: clean_names() %>% 
@@ -90,12 +89,12 @@ snp_df = read_csv("./data/snp.csv") %>%
   mutate (year = if_else(year>15, year + 1900, year + 2000)) %>% 
   relocate (year, month)
  
- 
 snp_df
 ```
 
+Tidy the unemployment data
 ```{r}
-unemployment_df = read_csv( "./data/unemployment.csv",col_types = "ddd" ) %>% 
+unemployment_df = read_csv( "./data/unemployment.csv" ) %>% 
   janitor :: clean_names() %>% 
   pivot_longer(
     jan:dec,
@@ -108,12 +107,12 @@ unemployment_df = read_csv( "./data/unemployment.csv",col_types = "ddd" ) %>%
 unemployment_df
 ```
 
+Join the datasets by merging `snp` into `pols`, and merging `unemployment` into the result.
 ```{r}
 snp_pol_df = 
-  left_join (pols_month_df, snp_df, by =c("year", "month"))
+  dplyr ::left_join (pols_month_df, snp_df, by = c("year", "month"))
 
 snp_pol_df
-
 
 final_df =
   left_join (snp_pol_df, unemployment_df, by= c("year", "month"))
@@ -123,38 +122,36 @@ final_df
 ```
 
 
+The `pols_month_df` contains 4932 observations of 4 variables related to the number of national politicians who are democratic or republican at any given time; the `snp_df` contains 787 observations of 3 variables of the closing values of the S&P stock index on the associated month; the `unemployment_df` shows the percentage of unemployment in months of the associated year. The result dataset `final_df` contains 4932 observations and 6 variables, with the year range from 1947 to 2015, varibles contain year, month, president, closing value and unemployment rate. 
+
+
 # Problem 3
+Tidy data
 ```{r}
 baby_name_df =read_csv("./data/Popular_Baby_Names.csv") %>% 
   janitor:: clean_names() %>% 
   distinct() %>% 
-  mutate(ethnicity =str_to_lower(ethnicity)) %>% 
+  mutate(ethnicity = str_to_lower(ethnicity)) %>% 
   mutate(childs_first_name = str_to_lower (childs_first_name)) %>% 
   
-  mutate(ethnicity = replace (
-    ethnicity, ethnicity == "asian and paci", "asian and pacific islander")) %>% 
-  mutate(ethnicity = replace (
-    ethnicity, ethnicity == "black non hisp", "black non hispanic")) %>% 
-  mutate(ethnicity = replace (
-    ethnicity, ethnicity == "white non hisp", "white non hispanic"))
+  mutate(ethnicity = replace (ethnicity, ethnicity == "asian and paci", "asian and pacific islander")) %>% 
+  mutate(ethnicity = replace (ethnicity, ethnicity == "black non hisp", "black non hispanic")) %>% 
+  mutate(ethnicity = replace (ethnicity, ethnicity == "white non hisp", "white non hispanic"))
   
-
 baby_name_df
 ```  
-  
   
   
 rank in popularity of the name “Olivia” as a female baby name over time;
 ```{r}
 olivia_df = baby_name_df %>% 
-  filter (childs_first_name == "olivia") %>% 
+  filter (childs_first_name == "olivia", gender == "FEMALE") %>% 
   select(-"gender", -"childs_first_name", -"count") %>% 
   pivot_wider(
     names_from = "year_of_birth",
     values_from = "rank"
   )
   
-
 knitr :: kable(olivia_df)
 ```
 
@@ -172,13 +169,10 @@ knitr :: kable(male_name_df)
 ```
 
 
-
-for male, white non-hispanic children born in 2016, produce a scatter plot showing the number of children with a name (y axis) against the rank in popularity of that name (x axis).
-
+For male, white non-hispanic children born in 2016, produce a scatter plot showing the number of children with a name (y axis) against the rank in popularity of that name (x axis).
 ```{r}
 plot_df = baby_name_df %>% 
   filter (gender == "MALE", year_of_birth == "2016", ethnicity == "white non hispanic") %>% 
-  mutate(childs_first_name = factor(childs_first_name)) %>% 
   relocate(childs_first_name)
 plot_df
 
