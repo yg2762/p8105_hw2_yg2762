@@ -14,7 +14,7 @@ library(readxl)
 Read and clean the Mr. Trash Wheel sheet
 
 ```{r}
-trash_wheel_df= read_excel("./data/Trash-Wheel-Collection-Totals-7-2021-sept.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N575") %>% 
+trash_wheel_df= read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "Mr. Trash Wheel", range = "A2:N535") %>% 
   janitor :: clean_names() %>% 
   drop_na(dumpster) %>% 
   mutate (sports_balls = round(sports_balls, digits= 0))
@@ -25,14 +25,14 @@ trash_wheel_df
 
 Read and clean precipitation data for 2018 and 2019,omit rows without precipitation data and add a variable for year.
 ```{r}
-precip2019_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2021-sept.xlsx", sheet="2019 Precipitation", range = "A2:B14") %>% 
+precip2019_df = read_excel("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet="2019 Precipitation", range = "A2:B14") %>% 
   janitor :: clean_names() %>% 
   mutate (year = "2019") %>% 
   drop_na()
 precip2019_df
 
 
-precip2018_df = read_excel ("./data/Trash-Wheel-Collection-Totals-7-2021-sept.xlsx", sheet="2018 Precipitation", range = "A2:B14") %>% 
+precip2018_df = read_excel ("./data/Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet="2018 Precipitation", range = "A2:B14") %>% 
   janitor :: clean_names() %>% 
   mutate (year = "2018") 
 precip2018_df
